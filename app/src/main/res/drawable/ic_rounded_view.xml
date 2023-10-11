@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <solid android:color="@color/Primary_Green" />
+    <corners
+        android:bottomLeftRadius="280dp"
+        android:bottomRightRadius="600dp"
+        android:topLeftRadius="0dp"
+        android:topRightRadius="0dp"/>
+    <gradient
+        android:startColor="#4DBC4F"
+    android:endColor="#E6F5E6"
+    android:angle="45" />          <!-- Ângulo do gradiente (45 graus é um exemplo) -->
+    />
+</shape>
