@@ -7,25 +7,16 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.widget.ImageButton
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.RecyclerView
-import androidx.room.Room
-import com.example.pacecalculator.HistoricListAdapter
 import com.example.pacecalculator.R
-import data.AppDataBase
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
+import data.HistoricItem
 
-class HistoryActivity: AppCompatActivity() {
+class HistoryActivity : AppCompatActivity() {
 
-    private val dataBase by lazy {
-        Room.databaseBuilder(
-            applicationContext,
-            AppDataBase::class.java, "Historic-database"
-        ).build()
+    private val viewModel: HistoricListViewModel by lazy {
+        HistoricListViewModel.create(application)
     }
-    private val dao by lazy { dataBase.HistoricDao() }
     private lateinit var historicList: RecyclerView
     private val adapter = HistoricListAdapter()
 
@@ -39,6 +30,7 @@ class HistoryActivity: AppCompatActivity() {
 
         btnVoltar.setOnClickListener {
             val intent = Intent(this, CalculatorActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
             startActivity(intent)
         }
 
@@ -48,34 +40,26 @@ class HistoryActivity: AppCompatActivity() {
         listFromDataBase()
 
         adapter.setOnDeleteClickListener {
-            CoroutineScope(Dispatchers.IO).launch {
-                dao.deleteById(it.id)
-                listFromDataBase()
-            }
+            viewModel.deleteById(it.id)
         }
+    }
 
+
+    override fun onStart() {
+        super.onStart()
+        listFromDataBase()
     }
 
     private fun listFromDataBase() {
 
-        CoroutineScope(Dispatchers.IO).launch {
-
-            val list = dao.getAll()
-            lifecycleScope.launch {
-                adapter.submitList(list)
-            }
-
+        //Observer (sozinho n faz nada, precisa atrelar ao life data)
+        val listObserver = Observer<List<HistoricItem>> {
+            adapter.submitList(it)
         }
-
+        //Live Data
+        viewModel.historicListLiveData.observe(this@HistoryActivity, listObserver)
     }
 
-    private fun deleteAll() {
-        CoroutineScope(Dispatchers.IO).launch {
-            dao.deleteAll()
-            listFromDataBase()
-        }
-
-    }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         val inflater: MenuInflater = menuInflater
@@ -86,7 +70,7 @@ class HistoryActivity: AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.menu_delete_all -> {
-                deleteAll()
+                viewModel.deleteAll()
                 true
             }
 

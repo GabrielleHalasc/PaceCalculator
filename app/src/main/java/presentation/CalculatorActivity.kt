@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
 import android.widget.TextView
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.room.Room
 import com.example.pacecalculator.R
@@ -25,7 +26,9 @@ class CalculatorActivity : AppCompatActivity() {
         ).build()
     }
 
-    private val dao by lazy { dataBase.HistoricDao() }
+    private val dao by lazy {
+        dataBase.HistoricDao()
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -38,6 +41,8 @@ class CalculatorActivity : AppCompatActivity() {
         val btnCalcular = findViewById<Button>(R.id.btn_calcular)
         val btnHistorico = findViewById<Button>(R.id.btn_historico)
         val txtRitmo = findViewById<TextView>(R.id.txt_result)
+
+        val viewModel: CalculatorViewModel by viewModels()
 
 
         btnHistorico.setOnClickListener {
@@ -68,8 +73,7 @@ class CalculatorActivity : AppCompatActivity() {
             if (distanciaString.isNotEmpty() && tempoString.isNotEmpty()) {
                 val distancia: Float = tietDistancia.text.toString().toFloat()
                 val tempo: Float = tietTempo.text.toString().toFloat()
-
-                val ritmo: Float = distancia / tempo
+                val ritmo:Float = viewModel.resultRitm(distancia,tempo)
 
                 txtRitmo.text = ritmo.toString()
 
@@ -80,7 +84,6 @@ class CalculatorActivity : AppCompatActivity() {
             }
 
         }
-
 
     }
 }

@@ -12,3 +12,4 @@ data class HistoricItem (
     val tempo: Float,
     val ritmo: Float,
     )
+
